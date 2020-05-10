@@ -34,6 +34,13 @@ find_package(wxWidgets 3.0 REQUIRED)
 add_executable(${PROJECT_NAME} WIN32 ${RTZassist_SRC})
 target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES})
 
+if(UNIX)
+include(FindXercesC)
+find_package(XercesC REQUIRED)
+include_directories( ${XercesC_INCLUDE_DIR} )
+target_link_libraries ( ${PROJECT_NAME} ${XercesC_LIBRARY} )
+endif()
+
 if(MSVC)
 add_custom_command(
     TARGET ${PROJECT_NAME}

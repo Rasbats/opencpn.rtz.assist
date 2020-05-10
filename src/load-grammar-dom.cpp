@@ -84,36 +84,36 @@ DOMLSParser* create_parser(XMLGrammarPool* pool)
 
 void OutputXML(xercesc::DOMDocument* pmyDOMDocument, std::string filePath)
 {
-	//Return the first registered implementation that has the desired features. In this case, we are after a DOM implementation that has the LS feature... or Load/Save. 
+	//Return the first registered implementation that has the desired features. In this case, we are after a DOM implementation that has the LS feature... or Load/Save.
 	static const XMLCh gLS[] = { chLatin_L, chLatin_S, chNull };
 	DOMImplementation *implementation = DOMImplementationRegistry::getDOMImplementation(gLS);
 
-	// Create a DOMLSSerializer which is used to serialize a DOM tree into an XML document. 
+	// Create a DOMLSSerializer which is used to serialize a DOM tree into an XML document.
 	DOMLSSerializer *serializer = ((DOMImplementationLS*)implementation)->createLSSerializer();
 
-	// Make the output more human readable by inserting line feeds. 
+	// Make the output more human readable by inserting line feeds.
 	if (serializer->getDomConfig()->canSetParameter(XMLUni::fgDOMWRTFormatPrettyPrint, true))
 		serializer->getDomConfig()->setParameter(XMLUni::fgDOMWRTFormatPrettyPrint, true);
 
-	// The end-of-line sequence of characters to be used in the XML being written out.  
+	// The end-of-line sequence of characters to be used in the XML being written out.
 	serializer->setNewLine(XMLString::transcode("\r\n"));
 
-	// Convert the path into Xerces compatible XMLCh*. 
+	// Convert the path into Xerces compatible XMLCh*.
 	XMLCh *tempFilePath = XMLString::transcode(filePath.c_str());
 
-	// Specify the target for the XML output. 
+	// Specify the target for the XML output.
 	XMLFormatTarget *formatTarget = new LocalFileFormatTarget(tempFilePath);
 
-	// Create a new empty output destination object. 
+	// Create a new empty output destination object.
 	DOMLSOutput *output = ((DOMImplementationLS*)implementation)->createLSOutput();
 
-	// Set the stream to our target. 
+	// Set the stream to our target.
 	output->setByteStream(formatTarget);
 
-	// Write the serialized output to the destination. 
+	// Write the serialized output to the destination.
 	serializer->write(pmyDOMDocument, output);
 
-	// Cleanup. 
+	// Cleanup.
 	serializer->release();
 	XMLString::release(&tempFilePath);
 	delete formatTarget;
@@ -128,7 +128,7 @@ int mainValidator(int argc, const char* argv[])
 
 	string startURI = "file:///";
 
-	char* fileName = "XML_errors_out.txt";	
+	char* fileName = "XML_errors_out.txt";
 	ofp2 = fopen(fileName, "w");
 
 	if (argc < 2)
@@ -167,14 +167,14 @@ int mainValidator(int argc, const char* argv[])
 			//path = file.GetPath();     // returns abs. path only
 
 			//fprintf(ofp2, path_and_file + "\n");
+            string pf = std::string(path_and_file);
+			string s = startURI + pf;  //  "file:///C:/Projects/RTZassist/rtz-sax/build/Debug/RTZSchemaversion1_0.xsd";
 
-			string s = startURI + path_and_file;  //  "file:///C:/Projects/RTZassist/rtz-sax/build/Debug/RTZSchemaversion1_0.xsd";
-			
-			
+
 
 			for (; i < argc; ++i)
 			{
-				
+
 				size_t n(s.size());
 
 				if (n < 5 || s[n - 4] != '.' || s[n - 3] != 'x' ||
@@ -226,8 +226,8 @@ int mainValidator(int argc, const char* argv[])
 		file1.Assign(argv[1]);         // mist.txt in current directory
 		file1.MakeAbsolute();
 		path_and_file1 = file1.GetFullPath();
-
-		string st = startURI + path_and_file1;  // "file:///C:/Projects/RTZassist/rtz-sax/build/Debug/NCA_Ardalstangen_Holmengra_In_20200115.rtz";
+        string pf1 = std::string(path_and_file1);
+		string st = startURI + pf1;  // "file:///C:/Projects/RTZassist/rtz-sax/build/Debug/NCA_Ardalstangen_Holmengra_In_20200115.rtz";
 
 		//fprintf(ofp2, "here\n");
 
@@ -239,7 +239,7 @@ int mainValidator(int argc, const char* argv[])
 			//fprintf(ofp2, argv[i]);
 			//fprintf(ofp2, "\n");
 
-			
+
 
 			XERCES_CPP_NAMESPACE::DOMDocument* doc(parser->parseURI(st.c_str()));
 
@@ -248,7 +248,7 @@ int mainValidator(int argc, const char* argv[])
 			//OutputXML(doc, "Parser.rtz" );
 
 			if (doc)
-				
+
 				doc->release();
 
 			if (eh.failed())

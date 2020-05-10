@@ -9,6 +9,7 @@
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 #include <iostream>
+#include <algorithm>
 
 #include "tinyxml2.h"
 
@@ -28,11 +29,11 @@ PanelMain( parent )
 	m_choiceSchema->SetSelection(0);
 
 };
-	
+
 
 
 void RTZassistPanelMain::OnReadGPX(wxCommandEvent& event)
-{	
+{
 
 	if(ReadGPX()) GPXtoWaypoints(filename);
 
@@ -45,7 +46,7 @@ bool RTZassistPanelMain::ReadGPX()
 	int my_count = 0;
 
 	wxArrayString file_array;
-	
+
 	wxString m_gpx_path;
 	wxFileDialog openDialog(this, _("Import GPX Route file"), m_gpx_path, wxT(""),
 		wxT("GPX files (*.gpx)|*.gpx|All files (*.*)|*.*"),
@@ -58,7 +59,7 @@ bool RTZassistPanelMain::ReadGPX()
 		if (file_array.GetCount()) {
 			wxFileName fn(file_array[0]);
 			filename = file_array[0];
-			m_gpx_path = fn.GetPath();			
+			m_gpx_path = fn.GetPath();
 			return true;
 		}
 	}
@@ -73,17 +74,17 @@ route RTZassistPanelMain::GPXtoWaypoints(wxString myGPX) {
 	waypoint myPoint;
 
 	tinyxml2::XMLDocument doc;
-	doc.LoadFile(myGPX);	
+	doc.LoadFile(myGPX);
 
-	// Let's make sure the file loaded fine...  
-	if (doc.ErrorID() == 0) {	
+	// Let's make sure the file loaded fine...
+	if (doc.ErrorID() == 0) {
 
 		m_waypointList.clear();
 		waypointsList.clear();
 
 		tinyxml2::XMLElement *pRoot = doc.RootElement();
 
-		// This is set to the first element named "rte" in the file  
+		// This is set to the first element named "rte" in the file
 
 		wxString nm;
 		wxString temp  = "";
@@ -98,7 +99,7 @@ route RTZassistPanelMain::GPXtoWaypoints(wxString myGPX) {
 					nm = f->GetText();
 					myRoute.routeName = nm;
 
-					
+
 				}
 
 				if (!strcmp(f->Value(), "rtept")) {
@@ -107,23 +108,23 @@ route RTZassistPanelMain::GPXtoWaypoints(wxString myGPX) {
 
 					wxString pt_name;
 					if (f->FirstChildElement("name") == nullptr) {
-						pt_name =  "blank";						
+						pt_name =  "blank";
 					}
 					else {
 						pt_name = f->FirstChildElement("name")->GetText();
-					}					
+					}
 
 					temp = pt_name + "    " + pt_lat + "   " + pt_lon + "\n";
-					
+
 					waypointsList.Add(temp, it);
-					
+
 					myPoint.lat = pt_lat;
 					myPoint.lon = pt_lon;
-					myPoint.name = pt_name;				
+					myPoint.name = pt_name;
 
-					m_waypointList.push_back(myPoint);					
-					
-				}  
+					m_waypointList.push_back(myPoint);
+
+				}
 
 			}
 
@@ -131,7 +132,7 @@ route RTZassistPanelMain::GPXtoWaypoints(wxString myGPX) {
 		}
 	}
 	else {
-		wxMessageBox("Error... returning");		
+		wxMessageBox("Error... returning");
 	}
 
 	//wxMessageBox("here");
@@ -143,7 +144,7 @@ route RTZassistPanelMain::GPXtoWaypoints(wxString myGPX) {
 
 		item = waypointsList.Item(z);
 
-		myTextWaypoints += item;	
+		myTextWaypoints += item;
 
 	}
 
@@ -153,8 +154,8 @@ route RTZassistPanelMain::GPXtoWaypoints(wxString myGPX) {
 }
 
 void RTZassistPanelMain::OnExportRTZ(wxCommandEvent& event) {
-	
-	if (ReadGPX()) {		
+
+	if (ReadGPX()) {
 		GPXtoWaypoints(filename);
 	}
 
@@ -211,9 +212,9 @@ int RTZassistPanelMain::ExportRTZ() {
 
 	xmlDoc.LinkEndChild(decl);
 
-	// Create XML root node called animals 
+	// Create XML root node called animals
 	tinyxml2::XMLElement* pRoot = xmlDoc.NewElement("route");
-	
+
 	const char* value;
 	if (selection == 0) {
 		value = "http://www.cirm.org/RTZ/1/0";
@@ -221,30 +222,30 @@ int RTZassistPanelMain::ExportRTZ() {
 	else if (selection == 1) {
 		value = "http://www.cirm.org/RTZ/1/1";
 	}
-	
+
 	char* sv = (const_cast<char*>((const char*)versn.mb_str()));
-	
+
 	pRoot->SetAttribute("xmlns", value);
 	pRoot->SetAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-	
+
 	if (selection == 0) {
 		pRoot->SetAttribute("xmlns:xsd", "http://www.w3.org/2001/XMLSchema");
 	}
-	
+
 	pRoot->SetAttribute("version", sv);
 
-	if (selection == 1) { 
+	if (selection == 1) {
 		pRoot->SetAttribute("xmlns:stm", "http://stmvalidation.eu/STM/1/0/0");
 	}
 
-	// Add pRoot to xmlDoc after prolog    
+	// Add pRoot to xmlDoc after prolog
 	xmlDoc.InsertEndChild(pRoot);
 
 	// ************* Add routeInfo to root node *******
 
 	tinyxml2::XMLElement* routeInfo = xmlDoc.NewElement("routeInfo");
 	pRoot->InsertFirstChild(routeInfo);
-	
+
 	// Route name must be the same as the file name, without file extension
 
 	int fl = rtzFileName.length();
@@ -252,10 +253,10 @@ int RTZassistPanelMain::ExportRTZ() {
 
 	char* rtzFN = (const_cast<char*>((const char*)rtzFileBit.mb_str()));
 	routeInfo->SetAttribute("routeName", rtzFN);
-	
-	// Insert cat's name as first child of animal    
-	
-	
+
+	// Insert cat's name as first child of animal
+
+
 	// ************* Add waypoints *******
 	waypoints = xmlDoc.NewElement("waypoints");
 	pRoot->InsertEndChild(waypoints);
@@ -269,19 +270,20 @@ int RTZassistPanelMain::ExportRTZ() {
 	int idn = 0;
 
 	for (std::vector<waypoint>::iterator itOut = m_waypointList.begin(); itOut != m_waypointList.end(); itOut++) {
-		
+
 
 		tinyxml2::XMLElement*m_waypoint = xmlDoc.NewElement("waypoint");
 		waypoints->InsertEndChild(m_waypoint);
-		m_waypoint->SetAttribute("id", wxString::Format(wxT("%i"), idn));
-		m_waypoint->SetAttribute("name", (*itOut).name);
+		wxString myIdn = wxString::Format(wxT("%i"), idn);
+		m_waypoint->SetAttribute("id", myIdn.mb_str());
+		m_waypoint->SetAttribute("name", (*itOut).name.mb_str());
 
 
 		tinyxml2::XMLElement* position = xmlDoc.NewElement("position");
-		
-		
-		position->SetAttribute("lat", (*itOut).lat);
-		position->SetAttribute("lon", (*itOut).lon);
+
+
+		position->SetAttribute("lat", (*itOut).lat.mb_str());
+		position->SetAttribute("lon", (*itOut).lon.mb_str());
 		m_waypoint->InsertEndChild(position);
 
 		idn++;
@@ -289,26 +291,26 @@ int RTZassistPanelMain::ExportRTZ() {
 	}
 	// done adding waypoints
 	// Write xmlDoc into a file
-	
+
 	xmlDoc.SaveFile(fileName);
-	
+
 
 	return 0;
 }
 
 void RTZassistPanelMain::OnReadRTZ( wxCommandEvent& event )
 {
-	
+
 	wxFileName f(wxStandardPaths::Get().GetExecutablePath());
 	wxString appPath(f.GetPath());
 
-	
+
 	wxString schemaSelection = appPath + "/data/" + m_choiceSchema->GetStringSelection();
 	if (schemaSelection == wxEmptyString) {
 		wxMessageBox("Please select a schema");
 		return;
 	}
-	
+
 	wxFileDialog dlg(this, _("Select RTZ file for reading"), wxEmptyString, wxEmptyString, _T("RTZ files (*.rtz)|*.rtz|All files (*.*)|*.*"), wxFD_OPEN);
 	if (dlg.ShowModal() == wxID_CANCEL) {
 		//error_occured = true;     // the user changed idea...
@@ -350,14 +352,14 @@ void RTZassistPanelMain::ReadRTZ(string schema, string rtz)
 }
 
 void RTZassistPanelMain::OnValidateRTZ(wxCommandEvent& event) {
-	
+
 	wxString schemaSelection = "/data/" + m_choiceSchema->GetStringSelection();
 
 	//wxMessageBox(schemaSelection);
-	
+
 	wxFileName f(wxStandardPaths::Get().GetExecutablePath());
 	wxString appPath(f.GetPath());
-	
+
 	if (schemaSelection == wxEmptyString) {
 		wxMessageBox("Please select a schema");
 		return;
@@ -388,9 +390,9 @@ void RTZassistPanelMain::ValidateRTZ(string schema, string rtz) {
 	const char* args[] = {schema.c_str(), rtz.c_str()};
 	int error = 0;
 	int r = 0;
-	
+
 	startURI = "file:///";
-	
+
 	r = mainValidator(argc, args);
 
 	wxString line = "";
@@ -421,9 +423,9 @@ void RTZassistPanelMain::ValidateRTZ(string schema, string rtz) {
 
 void RTZassistPanelMain::OnExportGPX(wxCommandEvent& event)
 {
-	
+
 	m_textCtrlShowResult->Clear();
-	
+
 	wxFileName f(wxStandardPaths::Get().GetExecutablePath());
 	wxString appPath(f.GetPath());
 
@@ -452,7 +454,7 @@ void RTZassistPanelMain::OnExportGPX(wxCommandEvent& event)
 	}
 
 	ExportGPX();
-	
+
 }
 
 
@@ -473,7 +475,9 @@ int RTZassistPanelMain::ExportGPX() {
 	string line;
 	while (getline(ips, line))
 	{
-		line.erase(remove_if(line.begin(), line.end(), isspace), line.end());
+		std::string::iterator end_pos = std::remove(line.begin(), line.end(), ' ');
+        line.erase(end_pos, line.end());
+
 		myVector.push_back(line);  // hold lines of file, without white space
 	}
 
@@ -539,7 +543,7 @@ int RTZassistPanelMain::ExportGPX() {
 
 	tinyxml2::XMLElement* RouteName = doc.NewElement("name");
 	Route->LinkEndChild(RouteName);
-	RouteName->SetText(myRoute.routeName);
+	RouteName->SetText(myRoute.routeName.mb_str());
 
 	tinyxml2::XMLElement* Extensions = doc.NewElement("extensions");
 
@@ -561,12 +565,12 @@ int RTZassistPanelMain::ExportGPX() {
 
 		tinyxml2::XMLElement*m_waypoint = doc.NewElement("rtept");
 		Route->InsertEndChild(m_waypoint);
-		m_waypoint->SetAttribute("lat", myRoute.waypoints[i].lat);
-		m_waypoint->SetAttribute("lon", myRoute.waypoints[i].lon);
+		m_waypoint->SetAttribute("lat", myRoute.waypoints[i].lat.mb_str());
+		m_waypoint->SetAttribute("lon", myRoute.waypoints[i].lon.mb_str());
 
 		tinyxml2::XMLElement* name = doc.NewElement("name");
 		m_waypoint->InsertFirstChild(name);
-		name->SetText(myRoute.waypoints[i].name);
+		name->SetText(myRoute.waypoints[i].name.mb_str());
 
 		tinyxml2::XMLElement* symbol = doc.NewElement("sym");
 		m_waypoint->InsertFirstChild(symbol);
