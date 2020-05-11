@@ -3,6 +3,7 @@
 
 #include "RTZassistFrameMain.h"
 #include "RTZassistPanelMain.h"
+#include "bitmaps/rtzassist.xpm"
 
 //#include "../data/folder.xpm"
 //wxIcon icon(play);
@@ -24,7 +25,9 @@ inline bool wxRTZassistApp::OnInit() {
 
 	auto *mainFrame = new RTZassistFrameMain(nullptr);
 	new RTZassistPanelMain(mainFrame);
-	//mainFrame->SetIcon(icon);
+	wxIcon app_icon(rtzassist);          // This comes from opencpn.xpm inclusion above
+	
+	mainFrame->SetIcon(app_icon);
 	mainFrame->Show(true);
 	mainFrame->Fit();
 
