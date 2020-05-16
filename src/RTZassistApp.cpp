@@ -31,6 +31,8 @@ inline bool wxRTZassistApp::OnInit() {
 	mainFrame->Show(true);
 	mainFrame->Fit();
 
+	mainFrame->SetTitle("RTZassist 0.2");
+
 	SetTopWindow(mainFrame);
 	return true;
 }
