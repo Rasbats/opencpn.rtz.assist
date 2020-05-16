@@ -467,6 +467,8 @@ int RTZassistPanelMain::ExportGPX() {
 	vector<waypoint> myVectorWaypoints;
 	// end of placeholders
 
+	wxString isRefpoint;
+
 	string readFile = "dom_out.txt"; // intermediate file - make temporary?
 	vector<string> myVector;
 
@@ -484,7 +486,7 @@ int RTZassistPanelMain::ExportGPX() {
 	int c = myVector.size();
 
 	for (int z = 0; z < c; z++) {
-
+		
 		wxStringTokenizer tokenizer(myVector[z], ":");
 		while (tokenizer.HasMoreTokens())
 		{
@@ -493,6 +495,15 @@ int RTZassistPanelMain::ExportGPX() {
 
 			if (token == "routeName") {
 				myRoute.routeName = tokenizer.GetNextToken();
+			}
+
+			myWaypoint.b_isRefpoint = false;
+
+			if (token == "tag") {
+				isRefpoint = tokenizer.GetNextToken();
+				if (isRefpoint == "refpoint") {
+					myWaypoint.b_isRefpoint = true;
+				}
 			}
 
 			if (token == "id") {
@@ -510,8 +521,9 @@ int RTZassistPanelMain::ExportGPX() {
 			if (token == "lon") {
 
 				myWaypoint.lon = tokenizer.GetNextToken();
-				myRoute.waypoints.push_back(myWaypoint);
-
+				//
+				if(!myWaypoint.b_isRefpoint)	myRoute.waypoints.push_back(myWaypoint);   // this eliminates RTZ refpoints, which have lat/lon and could be misinterpreted as waypoints.
+				//
 			}
 		}
 	}
@@ -564,21 +576,22 @@ int RTZassistPanelMain::ExportGPX() {
 	for (int i = 0; i < waypointCount; i++) {
 
 		tinyxml2::XMLElement*m_waypoint = doc.NewElement("rtept");
-		Route->InsertEndChild(m_waypoint);
-		m_waypoint->SetAttribute("lat", myRoute.waypoints[i].lat.mb_str());
-		m_waypoint->SetAttribute("lon", myRoute.waypoints[i].lon.mb_str());
+				
+			Route->InsertEndChild(m_waypoint);
+			m_waypoint->SetAttribute("lat", myRoute.waypoints[i].lat.mb_str());
+			m_waypoint->SetAttribute("lon", myRoute.waypoints[i].lon.mb_str());
 
-		tinyxml2::XMLElement* name = doc.NewElement("name");
-		m_waypoint->InsertFirstChild(name);
-		name->SetText(myRoute.waypoints[i].name.mb_str());
+			tinyxml2::XMLElement* name = doc.NewElement("name");
+			m_waypoint->InsertFirstChild(name);
+			name->SetText(myRoute.waypoints[i].name.mb_str());
 
-		tinyxml2::XMLElement* symbol = doc.NewElement("sym");
-		m_waypoint->InsertFirstChild(symbol);
-		symbol->SetText("diamond");
+			tinyxml2::XMLElement* symbol = doc.NewElement("sym");
+			m_waypoint->InsertFirstChild(symbol);
+			symbol->SetText("diamond");
 
-		tinyxml2::XMLElement* type = doc.NewElement("type");
-		m_waypoint->InsertFirstChild(type);
-		type->SetText("WPT");
+			tinyxml2::XMLElement* type = doc.NewElement("type");
+			m_waypoint->InsertFirstChild(type);
+			type->SetText("WPT");
 
 	}
 
