@@ -467,7 +467,7 @@ int RTZassistPanelMain::ExportGPX() {
 	vector<waypoint> myVectorWaypoints;
 	// end of placeholders
 
-	wxString isRefpoint;
+	wxString isExtension = "";
 
 	string readFile = "dom_out.txt"; // intermediate file - make temporary?
 	vector<string> myVector;
@@ -486,6 +486,10 @@ int RTZassistPanelMain::ExportGPX() {
 	int c = myVector.size();
 
 	for (int z = 0; z < c; z++) {
+
+		if (myVector[z] == "tag:extensions") {			
+			break;
+		}
 		
 		wxStringTokenizer tokenizer(myVector[z], ":");
 		while (tokenizer.HasMoreTokens())
@@ -497,12 +501,10 @@ int RTZassistPanelMain::ExportGPX() {
 				myRoute.routeName = tokenizer.GetNextToken();
 			}
 
-			myWaypoint.b_isRefpoint = false;
-
 			if (token == "tag") {
-				isRefpoint = tokenizer.GetNextToken();
-				if (isRefpoint == "refpoint") {
-					myWaypoint.b_isRefpoint = true;
+				isExtension = tokenizer.GetNextToken();
+				if (isExtension == "extension") {
+					break;	// this eliminates RTZ refpoints, which have lat/lon and could be misinterpreted as waypoints.
 				}
 			}
 
@@ -516,13 +518,13 @@ int RTZassistPanelMain::ExportGPX() {
 
 			if (token == "lat") {
 				myWaypoint.lat = tokenizer.GetNextToken();
-			}
+			} 
 
 			if (token == "lon") {
 
 				myWaypoint.lon = tokenizer.GetNextToken();
 				//
-				if(!myWaypoint.b_isRefpoint)	myRoute.waypoints.push_back(myWaypoint);   // this eliminates RTZ refpoints, which have lat/lon and could be misinterpreted as waypoints.
+				myRoute.waypoints.push_back(myWaypoint);   
 				//
 			}
 		}

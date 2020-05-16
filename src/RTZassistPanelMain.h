@@ -40,7 +40,7 @@ public:
 	wxString id;
 	wxString name;
 	wxString lat, lon;
-	bool b_isRefpoint;
+	
 };
 
 class route
