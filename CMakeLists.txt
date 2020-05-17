@@ -41,6 +41,13 @@ include_directories( ${XercesC_INCLUDE_DIR} )
 target_link_libraries ( ${PROJECT_NAME} ${XercesC_LIBRARY} )
 endif()
 
+if(APPLE)
+include(FindXercesC)
+find_package(XercesC REQUIRED)
+include_directories( ${XercesC_INCLUDE_DIR} )
+target_link_libraries ( ${PROJECT_NAME} ${XercesC_LIBRARY} )
+endif()
+
 if(MSVC)
 add_custom_command(
     TARGET ${PROJECT_NAME}
