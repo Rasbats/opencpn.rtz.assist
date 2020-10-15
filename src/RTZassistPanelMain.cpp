@@ -535,10 +535,10 @@ int RTZassistPanelMain::ExportGPX() {
 	tinyxml2::XMLDocument doc;  // main document for writing file
 
 	tinyxml2::XMLDeclaration* decl = doc.NewDeclaration();
-	decl->SetValue("version=""\"0.1\"");
+	decl->SetValue("xml version=""\"1.0\"");
 	doc.LinkEndChild(decl);
 
-	tinyxml2::XMLElement* root = doc.NewElement("gpx");
+	tinyxml2::XMLElement* root = doc.NewElement("gpx");	
 
 	root->SetAttribute("xmlns", "test");
 	root->SetAttribute("version", "1.1");
