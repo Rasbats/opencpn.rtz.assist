@@ -185,7 +185,7 @@ int mainValidator(int argc, const char* argv[])
 
 				if (!parser->loadGrammar(s.c_str(), Grammar::SchemaGrammarType, true))
 				{
-					fprintf(ofp2, "'%s'", s);
+					fprintf(ofp2, "'%s'", s.c_str());
 					fprintf(ofp2, ": error: unable to load");
 					fprintf(ofp2, "\n");
 					r = 1;
